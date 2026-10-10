@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { getLead, leadsByPhone, type LeadEvent } from "@/lib/leads/repo";
 import { CHANNELS, SERVICES, STATUSES, formatPhone, rupees, type Status } from "@/lib/leads/domain";
 import { fmtDate, fmtDateTime, fmtMins, toLocalInput } from "@/lib/format";
-import { Card, StatusBadge } from "@/components/admin/ui";
+import { Card, SampleBadge, StatusBadge } from "@/components/admin/ui";
 import { ContactButtons, DetailsForm, NoteForm, StatusActions } from "@/components/admin/forms";
 import { BUSINESS } from "@/lib/site";
 
@@ -53,6 +53,22 @@ export default async function LeadPage({ params }: { params: { id: string } }) {
     `Hi ${l.name}, this is ${BUSINESS.name} about your enquiry ${l.ref}` +
     ` (${SERVICES[l.service]}, ${route}${l.travelDate ? `, ${fmtDate(l.travelDate)}` : ""}).`;
 
+  const customer = (
+    <Card title="Customer">
+      <p className="text-lg font-semibold text-navy-900">{formatPhone(l.phone)}</p>
+      <div className="mt-3">
+        {l.isSample ? (
+          <p className="rounded-lg bg-slate-50 p-3 text-sm text-slate-600">
+            Sample lead with a placeholder number, so Call and WhatsApp are switched off.
+          </p>
+        ) : (
+          <ContactButtons id={l.id} phone={l.phone} waText={waText} />
+        )}
+      </div>
+      {l.message && <p className="mt-3 whitespace-pre-wrap rounded-lg bg-slate-50 p-3 text-sm text-slate-700">{l.message}</p>}
+    </Card>
+  );
+
   return (
     <div className="space-y-5">
       <div>
@@ -60,6 +76,7 @@ export default async function LeadPage({ params }: { params: { id: string } }) {
         <div className="mt-2 flex flex-wrap items-center gap-3">
           <h1 className="text-2xl font-bold text-navy-900">{l.name}</h1>
           <StatusBadge status={l.status} />
+          {l.isSample && <SampleBadge />}
           <span className="font-mono text-sm text-slate-500">{l.ref}</span>
         </div>
         <p className="mt-1 text-sm text-slate-600">
@@ -70,6 +87,8 @@ export default async function LeadPage({ params }: { params: { id: string } }) {
 
       <div className="grid gap-5 lg:grid-cols-[1fr,22rem]">
         <div className="space-y-5">
+          {/* On phones the sidebar lands below a long form, so Call / WhatsApp come first here. */}
+          <div className="lg:hidden">{customer}</div>
           <Card title="Next step">
             <StatusActions id={l.id} status={l.status} quotedAmount={l.quotedAmount} />
           </Card>
@@ -108,13 +127,7 @@ export default async function LeadPage({ params }: { params: { id: string } }) {
         </div>
 
         <aside className="space-y-5">
-          <Card title="Customer">
-            <p className="text-lg font-semibold text-navy-900">{formatPhone(l.phone)}</p>
-            <div className="mt-3">
-              <ContactButtons id={l.id} phone={l.phone} waText={waText} />
-            </div>
-            {l.message && <p className="mt-3 whitespace-pre-wrap rounded-lg bg-slate-50 p-3 text-sm text-slate-700">{l.message}</p>}
-          </Card>
+          <div className="hidden lg:block">{customer}</div>
 
           <Card title="Money">
             <dl className="grid grid-cols-2 gap-y-1 text-sm">

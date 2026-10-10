@@ -2,7 +2,10 @@ import Link from "next/link";
 import { getMetrics, listLeads } from "@/lib/leads/repo";
 import { SERVICES, formatPhone, rupees, type Service, type Status } from "@/lib/leads/domain";
 import { fmtDate, fmtDateTime, minutesSince, timeAgo } from "@/lib/format";
-import { Stat, StatusBadge, inputCls } from "@/components/admin/ui";
+import { SampleBadge, Stat, StatusBadge, inputCls } from "@/components/admin/ui";
+import { countSampleLeads } from "@/lib/leads/samples";
+import { removeSamples, resetSamples } from "@/app/admin/actions";
+import { PREVIEW } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 
@@ -26,9 +29,10 @@ export default async function Inbox({
   const q = typeof searchParams.q === "string" ? searchParams.q : undefined;
   const service = (searchParams.service && searchParams.service in SERVICES ? searchParams.service : "") as Service | "";
   const page = Math.max(1, Number(searchParams.page) || 1);
-  const [{ leads, total }, m] = await Promise.all([
+  const [{ leads, total }, m, samples] = await Promise.all([
     listLeads({ view: view as "due", q, service, limit: PAGE, offset: (page - 1) * PAGE }),
     getMetrics(30),
+    countSampleLeads(),
   ]);
   const qs = (over: Record<string, string | number | undefined>) => {
     const p = new URLSearchParams();
@@ -40,6 +44,34 @@ export default async function Inbox({
 
   return (
     <div className="space-y-5">
+      {(PREVIEW || samples > 0) && (
+        <div className="flex flex-col gap-2 rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-slate-700">
+            {samples > 0 ? (
+              <>
+                <span className="font-semibold text-navy-900">{samples} sample leads</span> are loaded so the desk and
+                reports have something to show. They&apos;re marked <SampleBadge /> and never sent to Google Ads.
+              </>
+            ) : (
+              "No sample leads loaded. Only real enquiries are shown."
+            )}
+          </p>
+          <div className="flex shrink-0 gap-2">
+            <form action={resetSamples}>
+              <button className="rounded-lg border border-slate-300 px-3 py-1.5 font-semibold text-navy-900 hover:bg-slate-50">
+                {samples > 0 ? "Reset samples" : "Load samples"}
+              </button>
+            </form>
+            {samples > 0 && (
+              <form action={removeSamples}>
+                <button className="rounded-lg border border-slate-300 px-3 py-1.5 font-semibold text-slate-600 hover:bg-slate-50">
+                  Remove samples
+                </button>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <Stat label="New, waiting > 15 min" value={m.overdueNew} tone={m.overdueNew ? "alert" : "default"} hint="Call these first" />
         <Stat label="Follow-ups due" value={m.followUpsDue} tone={m.followUpsDue ? "alert" : "default"} />
@@ -61,16 +93,16 @@ export default async function Inbox({
             </Link>
           ))}
         </nav>
-        <form className="flex flex-wrap gap-2" action="/admin">
+        <form className="flex flex-wrap gap-2 md:flex-nowrap" action="/admin">
           <input type="hidden" name="view" value={view} />
-          <input name="q" defaultValue={q} placeholder="Name, phone, ref, place" className={`${inputCls} mt-0 min-w-0 flex-1 md:w-56 md:flex-none`} />
-          <select name="service" defaultValue={service} className={`${inputCls} mt-0 w-36`}>
+          <input name="q" defaultValue={q} placeholder="Name, phone, ref, place" className={`${inputCls} mt-0 w-full min-w-0 md:w-56`} />
+          <select name="service" defaultValue={service} className={`${inputCls} mt-0 min-w-0 flex-1 md:w-36 md:flex-none`}>
             <option value="">All trips</option>
             {Object.entries(SERVICES).map(([k, l]) => (
               <option key={k} value={k}>{l}</option>
             ))}
           </select>
-          <button className="rounded-lg bg-navy-900 px-3 text-sm font-semibold text-white">Go</button>
+          <button className="rounded-lg bg-navy-900 px-4 py-2 text-sm font-semibold text-white">Go</button>
         </form>
       </div>
 
@@ -87,7 +119,10 @@ export default async function Inbox({
               <li key={l.id}>
                 <Link href={`/admin/leads/${l.id}`} className="grid gap-1 px-4 py-3 hover:bg-slate-50 md:grid-cols-[9rem,1fr,10rem,8rem] md:items-center md:gap-4">
                   <div className="flex items-center gap-2 md:block">
-                    <StatusBadge status={l.status as Status} />
+                    <span className="flex gap-1">
+                      <StatusBadge status={l.status as Status} />
+                      {l.isSample && <SampleBadge />}
+                    </span>
                     <p className={`text-xs md:mt-1 ${late ? "font-bold text-red-600" : "text-slate-500"}`}>
                       {timeAgo(l.createdAt, now)}
                     </p>

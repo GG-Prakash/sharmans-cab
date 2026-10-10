@@ -30,7 +30,8 @@ export async function GET(req: Request) {
   let body: string;
   let name: string;
   if (type === "google") {
-    const won = leads.filter((l) => l.gclid && l.bookedAt && (l.status === "booked" || l.status === "completed"));
+    // Sample leads carry made-up click IDs; uploading them would pollute Google's bidding.
+    const won = leads.filter((l) => !l.isSample && l.gclid && l.bookedAt && (l.status === "booked" || l.status === "completed"));
     // Header row and columns per Google Ads "offline conversion import" template.
     body =
       "Parameters:TimeZone=Asia/Calcutta\r\n" +
@@ -41,11 +42,11 @@ export async function GET(req: Request) {
     name = `google-ads-offline-conversions-${today}.csv`;
   } else {
     body = csv([
-      ["Ref", "Created (IST)", "Status", "Channel", "Trip", "Name", "Phone", "Pickup", "Drop", "Travel date", "Time", "Vehicle", "Passengers", "Quoted ₹", "Booked ₹", "Lost reason", "Handled by", "Source", "UTM source", "UTM medium", "Campaign", "Keyword", "gclid", "fbclid", "Landing page"],
+      ["Ref", "Created (IST)", "Status", "Channel", "Trip", "Name", "Phone", "Pickup", "Drop", "Travel date", "Time", "Vehicle", "Passengers", "Quoted ₹", "Booked ₹", "Lost reason", "Handled by", "Source", "UTM source", "UTM medium", "Campaign", "Keyword", "gclid", "fbclid", "Landing page", "Sample"],
       ...leads.map((l) => [
         l.ref, istStamp(l.createdAt), STATUSES[l.status], CHANNELS[l.channel], SERVICES[l.service], l.name, l.phone, l.pickup, l.drop,
         l.travelDate, l.travelTime, l.vehicle, l.passengers, l.quotedAmount, l.bookingValue, l.lostReason, l.assignedTo,
-        l.sourceBucket, l.source, l.medium, l.campaign, l.term, l.gclid, l.fbclid, l.landingPage,
+        l.sourceBucket, l.source, l.medium, l.campaign, l.term, l.gclid, l.fbclid, l.landingPage, l.isSample ? "yes" : "",
       ]),
     ]);
     name = `sharmans-leads-${today}.csv`;

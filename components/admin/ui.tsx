@@ -19,6 +19,14 @@ export function StatusBadge({ status }: { status: Status }) {
   );
 }
 
+export function SampleBadge() {
+  return (
+    <span className="inline-flex rounded-full bg-slate-800 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">
+      Sample
+    </span>
+  );
+}
+
 export function Card({ title, children, actions }: { title?: string; children: ReactNode; actions?: ReactNode }) {
   return (
     <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">

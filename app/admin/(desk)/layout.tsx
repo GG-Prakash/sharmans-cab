@@ -7,9 +7,9 @@ export const metadata: Metadata = { title: "Booking desk", robots: { index: fals
 export const dynamic = "force-dynamic";
 
 const NAV = [
-  { href: "/admin", label: "Leads" },
-  { href: "/admin/new", label: "+ Log a call" },
-  { href: "/admin/reports", label: "Reports" },
+  { href: "/admin", label: "Leads", short: "Leads" },
+  { href: "/admin/new", label: "+ Log a call", short: "+ Log" },
+  { href: "/admin/reports", label: "Reports", short: "Reports" },
 ];
 
 export default async function DeskLayout({ children }: { children: React.ReactNode }) {
@@ -24,8 +24,10 @@ export default async function DeskLayout({ children }: { children: React.ReactNo
           </Link>
           <nav className="flex flex-1 gap-1 overflow-x-auto text-sm">
             {NAV.map((n) => (
-              <Link key={n.href} href={n.href} className="whitespace-nowrap rounded-md px-3 py-1.5 font-medium text-navy-100 hover:bg-navy-800 hover:text-white">
-                {n.label}
+              <Link key={n.href} href={n.href} className="whitespace-nowrap rounded-md px-2.5 py-1.5 font-medium text-navy-100 hover:bg-navy-800 hover:text-white sm:px-3">
+                {/* Short labels keep all three tabs visible on a 360px phone. */}
+                <span className="sm:hidden">{n.short}</span>
+                <span className="hidden sm:inline">{n.label}</span>
               </Link>
             ))}
           </nav>

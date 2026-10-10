@@ -12,6 +12,7 @@ import {
   updateLead,
   WorkflowError,
 } from "@/lib/leads/repo";
+import { clearSampleLeads, countSampleLeads, resetSampleLeads } from "@/lib/leads/samples";
 
 const day = (n: number) => new Date(Date.now() + 86_400_000 * n).toISOString().slice(0, 10);
 const lead = (over: Partial<PublicLeadInput> = {}) =>
@@ -115,6 +116,28 @@ describe("pipeline", () => {
     expect(leads[0].status).toBe("new");
     const found = await listLeads({ view: "all", q: "000004" });
     expect(found.leads).toHaveLength(1);
+  });
+});
+
+describe("sample leads", () => {
+  it("loads 15 flagged samples with consistent timelines, resets idempotently and removes only samples", async () => {
+    const { total: realBefore } = await listLeads({ view: "all" });
+    expect(await resetSampleLeads()).toBe(15);
+    expect(await resetSampleLeads()).toBe(15);
+    expect(await countSampleLeads()).toBe(15);
+    const { leads } = await listLeads({ view: "all", limit: 500 });
+    const samples = leads.filter((l) => l.isSample);
+    expect(samples).toHaveLength(15);
+    for (const l of samples) {
+      expect(Date.parse(l.createdAt)).toBeLessThanOrEqual(Date.now());
+      if (l.bookedAt) expect(Date.parse(l.bookedAt)).toBeGreaterThan(Date.parse(l.quotedAt!));
+      if (l.status === "completed") expect(l.closedAt).not.toBeNull();
+      const d = await getLead(l.id);
+      const last = d!.events.find((e) => e.type === "status");
+      if (l.status !== "new" && l.status !== "contacted") expect(last?.data.to).toBe(l.status);
+    }
+    expect(await clearSampleLeads()).toBe(15);
+    expect((await listLeads({ view: "all" })).total).toBe(realBefore);
   });
 });
 

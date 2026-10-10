@@ -194,8 +194,8 @@ export default function QuoteForm() {
           </div>
         </div>
         <p className="mt-3 text-slate-600">
-          Our booking desk will call you on <span className="font-semibold text-navy-900">{fields.phone}</span>{" "}
-          {BUSINESS.callbackPromise} with your fare. Need it faster? Message us now.
+          Our booking desk will call you on <span className="font-semibold text-navy-900">{fields.phone}</span> to
+          confirm your fare with you. Need it faster? Message us now.
         </p>
         <dl className="mt-4 grid grid-cols-[auto,1fr] gap-x-4 gap-y-1 rounded-lg bg-navy-50 p-4 text-sm">
           {summaryLines(fields).map((line) => {

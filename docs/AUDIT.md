@@ -139,13 +139,19 @@ Priority is set by **₹ impact on cost per booking ÷ effort**, with "data the 
 
 ## 6. Content to confirm with the client
 
-These claims appear on the site and must be true before ads run:
+Every claim on the page is now one the client already makes on sharmanscab.com (home, "Why Sharmans Cab" and tariff pages):
+24x7 booking and customer care, trained and experienced drivers, the Zoho Books invoice portal, flat-fare airport transfers,
+the 5 hr / 50 km and 10 hr / 100 km local packages, the 250 km/day outstation minimum, the ₹600/₹700 driver allowance,
+5% GST and driver service from ₹300.
 
-- "Our desk calls you back **within 15 minutes, 24x7**" (`BUSINESS.callbackPromise`)
-- "Clean, sanitised vehicles" and "Flight-delay friendly"
-- "Experienced drivers". The old copy said "our own drivers", but the client also takes attached vehicles, so it was softened.
-- Airports served: Chennai, Coimbatore, Madurai, Trichy
-- Corporate invoicing "through Zoho" (true per the client's site; confirm it applies to retail customers too)
+Removed because nothing backs them yet: "callback within 15 minutes", "clean, sanitised vehicles", "flight-delay friendly",
+"no return fare on one-way drops" and "same-day" availability. The page now says the desk will **confirm with you** instead.
+
+Still to confirm with the client:
+
+- Per-km rates per vehicle. His tariff page says "available on request", so `FLEET[].rate` stays `null`.
+- Airports served: Chennai, Coimbatore, Madurai, Trichy (matches his cities, not stated per airport).
+- Driver allowance for the Mini Bus and 40-seater (not published).
 
 ## 7. Known limits of this pass
 

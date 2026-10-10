@@ -50,6 +50,7 @@ export type Lead = {
   bookedAt: string | null;
   closedAt: string | null;
   createdBy: string | null;
+  isSample: boolean;
   sourceBucket: string;
 };
 
@@ -105,6 +106,7 @@ function toLead(r: any): Lead {
     bookedAt: iso(r.booked_at),
     closedAt: iso(r.closed_at),
     createdBy: r.created_by,
+    isSample: r.is_sample === true,
   };
   return { ...lead, sourceBucket: sourceBucket(lead) };
 }

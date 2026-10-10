@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { BUSINESS, INDEXABLE, SITE_URL } from "@/lib/site";
+import { BUSINESS, INDEXABLE, PREVIEW, PREVIEW_CREDIT, SITE_URL } from "@/lib/site";
 import "./globals.css";
 
 const title = "Sharman's Cab Company — Chauffeur-driven Cabs & Buses in Tamil Nadu";
@@ -33,6 +33,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en-IN">
       <body className="bg-white font-sans text-slate-800 antialiased">
+        {PREVIEW && (
+          <p className="bg-amber-300 px-4 py-1 text-center text-xs font-medium leading-snug text-navy-950">
+            Preview concept for Sharman&apos;s Cab, by {PREVIEW_CREDIT}
+          </p>
+        )}
         {children}
       </body>
     </html>

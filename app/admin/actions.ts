@@ -17,6 +17,7 @@ import {
   updateLead,
   type LeadPatch,
 } from "@/lib/leads/repo";
+import { clearSampleLeads, resetSampleLeads } from "@/lib/leads/samples";
 
 export type ActionState = { ok?: boolean; error?: string; fields?: Record<string, string>; at?: number };
 
@@ -140,6 +141,20 @@ export async function logContact(id: string, via: "call" | "whatsapp") {
   await markContacted(id, staff.name, via);
   revalidatePath(`/admin/leads/${id}`);
   revalidatePath("/admin");
+}
+
+/* ---------- Demo data ---------- */
+
+export async function resetSamples() {
+  await requireStaff();
+  await resetSampleLeads();
+  revalidatePath("/admin", "layout");
+}
+
+export async function removeSamples() {
+  await requireStaff();
+  await clearSampleLeads();
+  revalidatePath("/admin", "layout");
 }
 
 export async function createLead(_: ActionState, fd: FormData): Promise<ActionState> {

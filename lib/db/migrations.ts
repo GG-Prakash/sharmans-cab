@@ -64,4 +64,11 @@ export const MIGRATIONS: { version: number; statements: string[] }[] = [
       `CREATE INDEX lead_events_lead_idx ON lead_events (lead_id, at)`,
     ],
   },
+  {
+    version: 2,
+    statements: [
+      // Demo leads for the pitch: badged in the desk, never exported as ad conversions, removable in one click.
+      `ALTER TABLE leads ADD COLUMN is_sample boolean NOT NULL DEFAULT false`,
+    ],
+  },
 ];

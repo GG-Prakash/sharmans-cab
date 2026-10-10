@@ -16,6 +16,8 @@ import {
 import {
   BUSINESS,
   CITIES,
+  DRIVER_SERVICE_FROM,
+  FARE_TERMS,
   FLEET,
   SITE_URL,
   TEL_HREF,
@@ -32,17 +34,17 @@ const SERVICES = [
   {
     icon: PlaneIcon,
     title: "Airport Transfers",
-    text: "On-time pickups and drops at Chennai, Coimbatore, Madurai and Trichy airports. Flight-delay friendly.",
+    text: "Flat-fare pickups and drops at Chennai, Coimbatore, Madurai and Trichy airports.",
   },
   {
     icon: RouteIcon,
     title: "One-way Drop Taxi",
-    text: "Pay only for the distance you travel — no return fare on intercity drops across Tamil Nadu.",
+    text: "One-way taxi from anywhere in Tamil Nadu: inter-city, inter-district and inter-state. Fare confirmed with you upfront.",
   },
   {
     icon: BriefcaseIcon,
     title: "Corporate Hire",
-    text: "Monthly and on-demand cabs for staff and guests, with GST invoices raised through Zoho.",
+    text: "Monthly and on-demand cabs for staff and guests. GST invoices on a Zoho Books client portal.",
   },
   {
     icon: BusIcon,
@@ -54,30 +56,34 @@ const SERVICES = [
 const TRUST = [
   { big: "Since 2007", small: `${new Date().getFullYear() - Number(BUSINESS.founded)}+ years on Tamil Nadu roads` },
   { big: "GST registered", small: "Proper tax invoices" },
-  { big: "Zoho invoicing", small: "Clean billing for corporates" },
-  { big: "24x7", small: "Bookings & support, any hour" },
+  { big: "Zoho Books portal", small: "View & download invoices any time" },
+  { big: "24x7", small: "Booking & customer care" },
 ];
 
 const FAQS = [
   {
     q: "How is the fare calculated?",
-    a: "Outstation trips are charged per kilometre for the vehicle you choose, plus driver allowance. Tolls, parking and interstate permits (if any) are extra at actuals. We share the full fare upfront before you confirm.",
+    a: "Local hire uses 5 hr / 50 km or 10 hr / 100 km packages, garage to garage. Outstation trips are billed per calendar day with a minimum of 250 km a day, plus a driver allowance of ₹600 a day (₹700 for the Force Traveller). Tolls, parking and permits are at actuals, and GST is 5% extra. We confirm the full fare with you before you book.",
   },
   {
-    q: "Do you charge return fare on one-way drops?",
-    a: "No. Our one-way drop taxi is billed only for the one-way distance, so you don't pay for the cab's empty return trip.",
+    q: "How are one-way drops charged?",
+    a: "Tell us the pickup, drop and date, and we confirm the one-way fare with you before you book.",
   },
   {
     q: "How early should I book?",
-    a: "Cabs can usually be arranged the same day. For buses, Tempo Travellers and weekend or festival dates, book 2–3 days ahead to be sure of availability.",
+    a: "Call or send the form with your date and we'll confirm availability with you. For buses, Travellers and weekend or festival dates, booking a few days ahead is safer.",
   },
   {
     q: "Will I get a GST invoice?",
-    a: `Yes. We are GST registered (GSTIN ${BUSINESS.gstin}) and corporate clients receive itemised invoices through Zoho.`,
+    a: `Yes. We are GST registered (GSTIN ${BUSINESS.gstin}), and clients can view and download current and past invoices on our Zoho Books client portal.`,
   },
   {
     q: "Are your drivers experienced?",
-    a: "Every trip is chauffeur-driven by experienced drivers who know Tamil Nadu's highways, ghat roads and city routes.",
+    a: "Every trip is chauffeur-driven by trained, experienced professional drivers.",
+  },
+  {
+    q: "Can I hire just a driver for my own car?",
+    a: `Yes. Our driver service in and around Chennai starts from ₹${DRIVER_SERVICE_FROM}.`,
   },
   {
     q: "Which areas do you cover?",
@@ -202,8 +208,8 @@ export default function Home() {
                 <span className="text-amber-400">Tamil Nadu</span>
               </h1>
               <p className="mt-4 max-w-xl text-lg text-navy-100">
-                Airport transfers, one-way drops, corporate hire and 12–40 seater buses. Upfront
-                fares, experienced drivers, GST invoices.
+                Airport transfers, one-way drops, corporate hire and 12–40 seater buses. Fare
+                confirmed with you upfront, trained drivers, GST invoices.
               </p>
 
               <div className="mt-6 grid gap-3 sm:flex sm:flex-wrap">
@@ -234,7 +240,7 @@ export default function Home() {
               </div>
 
               <ul className="mt-6 hidden space-y-2 text-navy-100 md:block">
-                {["No return fare on one-way drops", "Fare confirmed before you book", "Clean, sanitised vehicles"].map(
+                {["Fare confirmed with you before you book", "Trained, experienced drivers", "24x7 booking & customer care"].map(
                   (t) => (
                     <li key={t} className="flex items-center gap-2">
                       <CheckIcon className="h-5 w-5 text-amber-400" /> {t}
@@ -246,7 +252,7 @@ export default function Home() {
 
             <div id="quote" className="scroll-mt-4 rounded-2xl bg-white p-5 text-slate-800 shadow-xl sm:p-6">
               <h2 className="text-xl font-bold text-navy-900">Get a free quote</h2>
-              <p className="mb-4 mt-1 text-sm text-slate-500">Our desk calls you back {BUSINESS.callbackPromise}, 24x7.</p>
+              <p className="mb-4 mt-1 text-sm text-slate-500">Our desk calls you back to confirm the fare with you.</p>
               <QuoteForm />
             </div>
           </div>
@@ -298,15 +304,21 @@ export default function Home() {
                       <UsersIcon /> {v.seats}
                     </p>
                     <p className="mt-1 text-sm text-slate-500">{v.note}</p>
-                    <p className="mt-4 text-sm text-slate-600">
-                      {v.rate != null ? (
-                        <>
+                    <div className="mt-4 text-sm text-slate-600">
+                      {v.rate != null && (
+                        <p>
                           from <span className="text-xl font-bold text-navy-900">₹{v.rate}</span>/km
-                        </>
-                      ) : (
-                        <span className="font-semibold text-navy-900">Rate on request</span>
+                        </p>
                       )}
-                    </p>
+                      {v.allowance != null ? (
+                        <p>
+                          Driver allowance <span className="text-lg font-bold text-navy-900">₹{v.allowance}</span>/day
+                          <span className="block text-xs text-slate-500">outstation · min. 250 km/day</span>
+                        </p>
+                      ) : (
+                        v.rate == null && <p className="font-semibold text-navy-900">Fare confirmed with you</p>
+                      )}
+                    </div>
                     <a
                       href="#quote"
                       className="mt-4 rounded-lg border border-navy-200 py-2 text-center text-sm font-semibold text-navy-800 hover:bg-navy-50"
@@ -317,9 +329,21 @@ export default function Home() {
                 );
               })}
             </div>
-            <p className="mt-4 text-xs text-slate-600">
-              Rates exclude tolls, parking, permits and driver allowance. Final fare confirmed before booking.
-            </p>
+            <div className="mt-6 rounded-xl bg-white p-5 shadow-sm">
+              <h3 className="font-bold text-navy-900">How fares work</h3>
+              <dl className="mt-3 grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-4">
+                {FARE_TERMS.map((t) => (
+                  <div key={t.title}>
+                    <dt className="font-semibold text-navy-900">{t.title}</dt>
+                    <dd className="mt-0.5 text-slate-600">{t.text}</dd>
+                  </div>
+                ))}
+              </dl>
+              <p className="mt-4 border-t border-slate-100 pt-3 text-sm text-slate-600">
+                Need only a driver for your own car? Driver service from{" "}
+                <span className="font-bold text-navy-900">₹{DRIVER_SERVICE_FROM}</span>.
+              </p>
+            </div>
           </div>
         </section>
 

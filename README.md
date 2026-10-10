@@ -29,7 +29,7 @@ To run the tests against a real, **throwaway** Postgres: `TEST_DATABASE_URL=post
 
 ## Deploy (Vercel)
 
-1. Create a Postgres database (Neon, Mumbai region, is simplest) and copy its pooled connection string.
+1. Create a Postgres database (Neon, Mumbai region `aws-ap-south-1`, is simplest) and copy its pooled connection string. Functions run in Mumbai (`bom1`, see `vercel.json`) to sit next to it.
 2. In Vercel → Settings → Environment Variables, set everything in `.env.example`. `DATABASE_URL`, `ADMIN_PASSWORD` and `SESSION_SECRET` are required.
 3. Set `NEXT_PUBLIC_INDEXABLE=true` **only** on the production environment, once the domain points here.
 4. Add an uptime monitor on `/api/health` (returns 200 when the database is reachable).
@@ -49,8 +49,17 @@ Tables are created on first request; migrations live in `lib/db/migrations.ts` (
 - `call_click` / `whatsapp_click`: `{ cta_location }` (`hero`, `header`, `sticky_bar`, `quote_success`, `quote_error`, `footer_cta`, `footer`)
 - `form_submit`: `{ lead_ref, service, vehicle_type }`. Fired only when a **new** lead is stored, so use it as the Google Ads / Meta lead conversion.
 
+## Preview / pitch mode
+
+While `NEXT_PUBLIC_PREVIEW` is not `"false"`, every page shows a slim "Preview concept for Sharman's Cab, by Gnanaprakash G." banner and the desk shows a sample-data bar.
+
+- **Sample leads:** 15 demo leads across Google Ads, Meta Ads, organic, phone and WhatsApp, at every stage of the pipeline (`lib/leads/samples.ts`). They are flagged `is_sample`, badged **Sample** in the desk, have Call/WhatsApp switched off, and are never put in the Google Ads conversion export.
+- Load or refresh them from the desk (**Load / Reset samples**) or the CLI: `DATABASE_URL=… npm run seed:demo` (`-- --remove` to delete). Reset re-dates them relative to today, so run it before a demo or a recording.
+- The walkthrough video script is in [docs/DEMO_VIDEO.md](docs/DEMO_VIDEO.md).
+
 ## Before go-live
 
-- Fill per-km rates in `lib/site.ts` (`rate: null` shows "Rate on request").
-- Confirm the content claims listed in `docs/AUDIT.md` § Content to confirm (callback promise, 24x7, drivers, sanitised vehicles).
+- Set `NEXT_PUBLIC_PREVIEW=false`, remove the sample leads, set `NEXT_PUBLIC_INDEXABLE=true` and change `ADMIN_PASSWORD`.
+- Fill per-km rates in `lib/site.ts` once the client confirms them (his tariff page says "on request"; the page shows his published driver allowance and fare terms meanwhile).
+- Confirm what's left in `docs/AUDIT.md` § Content to confirm.
 - Have the privacy notice (`app/(site)/privacy/page.tsx`) reviewed.
