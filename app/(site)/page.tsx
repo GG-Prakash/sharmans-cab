@@ -25,6 +25,9 @@ import {
 
 const WA_HREF = whatsappHref(WHATSAPP_DEFAULT_TEXT);
 
+// Re-render daily so year counts and the copyright never go stale on a static deploy.
+export const revalidate = 86400;
+
 const SERVICES = [
   {
     icon: PlaneIcon,
@@ -74,7 +77,7 @@ const FAQS = [
   },
   {
     q: "Are your drivers experienced?",
-    a: "All trips are chauffeur-driven by our own experienced drivers who know Tamil Nadu's highways, ghat roads and city routes.",
+    a: "Every trip is chauffeur-driven by experienced drivers who know Tamil Nadu's highways, ghat roads and city routes.",
   },
   {
     q: "Which areas do you cover?",
@@ -96,8 +99,12 @@ const jsonLd = {
       foundingDate: BUSINESS.founded,
       taxID: BUSINESS.gstin,
       priceRange: "₹₹",
+      legalName: BUSINESS.legalName,
+      email: BUSINESS.email,
       address: {
         "@type": "PostalAddress",
+        addressLocality: "Karambur Village",
+        postalCode: "603204",
         addressRegion: "Tamil Nadu",
         addressCountry: "IN",
       },
@@ -161,7 +168,7 @@ export default function Home() {
 
       <header className="bg-navy-900">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-          <a href="#" className="flex items-center gap-2 text-white">
+          <a href="/" className="flex items-center gap-2 text-white">
             <span className="flex h-8 w-8 items-center justify-center rounded-md bg-amber-400 text-lg font-bold text-navy-950">
               S
             </span>
@@ -239,7 +246,7 @@ export default function Home() {
 
             <div id="quote" className="scroll-mt-4 rounded-2xl bg-white p-5 text-slate-800 shadow-xl sm:p-6">
               <h2 className="text-xl font-bold text-navy-900">Get a free quote</h2>
-              <p className="mb-4 mt-1 text-sm text-slate-500">Fare on WhatsApp in minutes.</p>
+              <p className="mb-4 mt-1 text-sm text-slate-500">Our desk calls you back {BUSINESS.callbackPromise}, 24x7.</p>
               <QuoteForm />
             </div>
           </div>
@@ -281,8 +288,8 @@ export default function Home() {
           <div className="mx-auto max-w-6xl px-4">
             <SectionHeading eyebrow="Fleet" title="Pick the right vehicle" />
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-              {FLEET.map((v, i) => {
-                const Icon = i < 2 ? CarIcon : BusIcon;
+              {FLEET.map((v) => {
+                const Icon = v.bus ? BusIcon : CarIcon;
                 return (
                   <article key={v.name} className="flex flex-col rounded-xl bg-white p-5 shadow-sm">
                     <Icon className="h-7 w-7 text-navy-700" />
@@ -292,7 +299,13 @@ export default function Home() {
                     </p>
                     <p className="mt-1 text-sm text-slate-500">{v.note}</p>
                     <p className="mt-4 text-sm text-slate-600">
-                      from <span className="text-xl font-bold text-navy-900">₹{v.rate}</span>/km
+                      {v.rate != null ? (
+                        <>
+                          from <span className="text-xl font-bold text-navy-900">₹{v.rate}</span>/km
+                        </>
+                      ) : (
+                        <span className="font-semibold text-navy-900">Rate on request</span>
+                      )}
                     </p>
                     <a
                       href="#quote"
@@ -379,6 +392,11 @@ export default function Home() {
           </p>
           <p>
             GSTIN: <span className="font-mono text-white">{BUSINESS.gstin}</span>
+          </p>
+          <p>
+            <a href="/privacy" className="hover:underline">
+              Privacy
+            </a>
           </p>
           <p>
             <TrackedLink href={TEL_HREF} event="call_click" location="footer" className="text-amber-400 hover:underline">
